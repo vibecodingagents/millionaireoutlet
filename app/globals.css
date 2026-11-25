@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Brand tokens (see docs/DESIGN.md). Use these classes, not raw hex values. */
+@theme {
+  --color-ink: #111111;
+  --color-muted: #666666;
+  --color-line: #e6e1d6;
+  --color-cream: #f7f5f0;
+  --color-gold: #b8924a;
+  --color-gold-dark: #8a6a2f;
+  --color-deal: #1e7b4f;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+/* Long-form article text. */
+.prose-site {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+}
+.prose-site p + p {
+  margin-top: 1rem;
+}
+.prose-site a {
+  color: var(--color-gold-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-site a:hover {
+  color: var(--color-ink);
+}
+.prose-site ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 1rem 0;
+}
+.prose-site ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 1rem 0;
+}
+.prose-site li + li {
+  margin-top: 0.35rem;
 }
