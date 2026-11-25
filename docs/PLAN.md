@@ -4,37 +4,37 @@ Tick items off as they are done. Do one phase at a time. Ask before moving to th
 
 ## Phase 0: Setup
 - [ ] Private GitHub repo `millionaireoutlet` with CLAUDE.md and docs/
-- [ ] Next.js (App Router, TypeScript, Tailwind) scaffold
+- [x] Next.js (App Router, TypeScript, Tailwind) scaffold
 - [ ] Supabase project created, env vars set locally and in Vercel
 - [ ] Vercel project linked to repo, preview deploys working
 - [ ] Domain connected (Raghu adds the DNS records)
 
 ## Phase 1: Auth, categories, pages, SEO
-- [ ] Migration: `categories`, `pages`
-- [ ] Row-level security: public reads published only, admin writes
-- [ ] Supabase Auth, single admin user, `/admin` protected
-- [ ] Category CRUD
-- [ ] Page CRUD with draft/published status and category picker
-- [ ] Block editor: heading, rich text, image, deal card, link button, FAQ, CTA
-- [ ] SEO fields per page and category: meta title, description, canonical, OG image, noindex, schema JSON
-- [ ] Public routes: `/[category]` and `/[category]/[slug]`, server-rendered
-- [ ] Revalidate on publish
-- [ ] `sitemap.xml` and `robots.txt` from DB
-- [ ] Homepage
+- [x] Migration: `categories`, `pages`
+- [x] Row-level security: public reads published only, admin writes
+- [x] Supabase Auth, single admin user, `/admin` protected
+- [x] Category CRUD
+- [x] Page CRUD with draft/published status and category picker
+- [x] Block editor: heading, rich text, image, deal card, link button, FAQ, CTA
+- [x] SEO fields per page and category: meta title, description, canonical, OG image, noindex, schema JSON
+- [x] Public routes: `/[category]` and `/[category]/[slug]`, server-rendered
+- [x] Revalidate on publish
+- [x] `sitemap.xml` and `robots.txt` from DB
+- [x] Homepage
 - [ ] Typecheck, lint, build pass; deploy preview
 
 ## Phase 2: Link manager
-- [ ] Migration: `links`, `link_clicks`
-- [ ] Admin UI to add/edit links (label, slug, destination)
-- [ ] `/go/[slug]` logs click and 302-redirects
-- [ ] Link picker inside the block editor
-- [ ] Click stats table in admin
-- [ ] Outbound links get `rel="sponsored nofollow"` automatically
+- [x] Migration: `links`, `link_clicks`
+- [x] Admin UI to add/edit links (label, slug, destination)
+- [x] `/go/[slug]` logs click and 302-redirects
+- [x] Link picker inside the block editor
+- [x] Click stats table in admin
+- [x] Outbound links get `rel="sponsored nofollow"` automatically
 
 ## Phase 3: Media library
-- [ ] Migration: `media`; Supabase Storage bucket
-- [ ] Upload, alt text required, auto-convert to WebP
-- [ ] Image picker inside the block editor
+- [x] Migration: `media`; Supabase Storage bucket
+- [x] Upload, alt text required, auto-convert to WebP
+- [x] Image picker inside the block editor
 
 ## Phase 4: AI helpers
 - [ ] Generate meta title/description from page content
@@ -44,7 +44,7 @@ Tick items off as they are done. Do one phase at a time. Ask before moving to th
 
 ## Launch checklist
 - [ ] Google Search Console verified, sitemap submitted
-- [ ] Affiliate disclosure page and footer link
-- [ ] Privacy policy and contact page
+- [x] Affiliate disclosure page and footer link
+- [x] Privacy policy and contact page
 - [ ] Core Web Vitals checked on mobile
 - [ ] 20+ published pages in the first niche

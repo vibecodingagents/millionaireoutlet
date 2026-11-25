@@ -13,3 +13,6 @@ export const FOOTER_LINKS = [
 
 export const AFFILIATE_REL = "sponsored nofollow";
 export const goHref = (slug: string) => `/go/${slug}`;
+
+// ISO timestamp N days ago (used for click stats windows).
+export const daysAgoIso = (days: number) => new Date(Date.now() - days * 86_400_000).toISOString();

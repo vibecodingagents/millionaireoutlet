@@ -7,7 +7,7 @@ export default async function Pages({ searchParams }: { searchParams: Promise<{ 
   const supabase = await serverClient();
   const { data: pages } = await supabase
     .from("pages")
-    .select("id, title, slug, status, categories(name, slug)")
+    .select("id, title, slug, status, updated_at, categories(name, slug)")
     .order("updated_at", { ascending: false });
   return (
     <div>
@@ -20,12 +20,13 @@ export default async function Pages({ searchParams }: { searchParams: Promise<{ 
         {pages?.map((p) => {
           const cat = Array.isArray(p.categories) ? p.categories[0] : p.categories;
           return (
-            <li key={p.id} className="flex items-center justify-between py-2">
+            <li key={p.id} className="flex items-center justify-between gap-4 py-2">
               <Link href={`/admin/pages/${p.id}`} className="hover:underline">
                 {p.title} <span className="text-sm text-gray-500">/{cat?.slug}/{p.slug}</span>
               </Link>
-              <span className="flex items-center gap-4 text-sm">
+              <span className="flex shrink-0 items-center gap-4 text-sm">
                 <span className={p.status === "published" ? "text-green-700" : "text-gray-500"}>{p.status}</span>
+                {p.status === "published" && <a href={`/${cat?.slug}/${p.slug}`} target="_blank" className="underline">View</a>}
                 <form action={deletePage}>
                   <input type="hidden" name="id" value={p.id} />
                   <button className="text-red-600 underline">Delete</button>

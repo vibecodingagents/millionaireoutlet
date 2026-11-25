@@ -1,26 +1,30 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { publicClient } from "@/lib/supabase/public";
-import { buildMetadata, SITE_URL } from "@/lib/seo";
+import { BlockRenderer } from "@/components/BlockRenderer";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Disclosure } from "@/components/Disclosure";
+import { JsonLd } from "@/components/JsonLd";
+import { PageGrid } from "@/components/PageCard";
+import { hasAffiliateLinks, mediaIds, parseBlocks } from "@/lib/blocks";
+import { getCategory, getPage, getRelatedPages } from "@/lib/content";
+import { loadMedia } from "@/lib/media";
+import { buildMetadata, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const revalidate = 60;
 
-async function load(categorySlug: string, slug: string) {
-  const supabase = publicClient();
-  const { data: category } = await supabase.from("categories").select("id, name, slug").eq("slug", categorySlug).maybeSingle();
-  if (!category) return null;
-  const { data: page } = await supabase
-    .from("pages")
-    .select("*")
-    .eq("category_id", category.id)
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
-  return page ? { category, page } : null;
+// Render on first request, then serve from cache (ISR). Publishing revalidates.
+export async function generateStaticParams() {
+  return [];
 }
 
 type Params = Promise<{ category: string; slug: string }>;
+
+async function load(categorySlug: string, slug: string) {
+  const category = await getCategory(categorySlug);
+  if (!category) return null;
+  const page = await getPage(category.id, slug);
+  return page ? { category, page } : null;
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { category, slug } = await params;
@@ -29,54 +33,62 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return buildMetadata(data.page, `/${category}/${slug}`);
 }
 
+const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { dateStyle: "long", timeZone: "America/New_York" });
+
 export default async function ContentPage({ params }: { params: Params }) {
-  const { category, slug } = await params;
-  const data = await load(category, slug);
+  const { category: categorySlug, slug } = await params;
+  const data = await load(categorySlug, slug);
   if (!data) notFound();
-  const { page } = data;
-  const url = `${SITE_URL}/${category}/${slug}`;
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-        { "@type": "ListItem", position: 2, name: data.category.name, item: `${SITE_URL}/${category}` },
-        { "@type": "ListItem", position: 3, name: page.title, item: url },
-      ],
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      headline: page.title,
-      description: page.meta_description ?? undefined,
-      datePublished: page.published_at ?? undefined,
-      dateModified: page.updated_at,
-      mainEntityOfPage: url,
-    },
-    ...(page.schema_json ? [page.schema_json] : []),
-  ];
-  const blocks = (page.blocks ?? []) as { type: string; text?: string }[];
+  const { category, page } = data;
+  const blocks = parseBlocks(page.blocks);
+  const [media, related] = await Promise.all([
+    loadMedia(mediaIds(blocks)),
+    getRelatedPages(category.id, slug),
+  ]);
+  const url = `${SITE_URL}/${categorySlug}/${slug}`;
+
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <nav className="mb-4 text-sm text-neutral-500">
-        <Link href="/">Home</Link> / <Link href={`/${category}`}>{data.category.name}</Link>
-      </nav>
-      <h1 className="mb-4 text-3xl font-semibold">{page.title}</h1>
-      <p className="mb-6 text-sm text-neutral-500">
-        We may earn a commission if you buy through links on this page, at no extra cost to you.
-      </p>
-      <article className="space-y-4 leading-relaxed">
-        {blocks.map((b, i) =>
-          b.type === "text" ? <p key={i} className="whitespace-pre-line">{b.text}</p> : null,
-        )}
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <article className="mx-auto max-w-3xl">
+        <Breadcrumbs
+          items={[
+            { name: category.name, href: `/${categorySlug}` },
+            { name: page.title, href: `/${categorySlug}/${slug}` },
+          ]}
+        />
+        <h1 className="mt-6 font-serif text-4xl leading-tight sm:text-5xl">{page.title}</h1>
+        <p className="mt-4 text-sm text-muted">
+          By the {SITE_NAME} team &middot; Last updated <time dateTime={page.updated_at}>{fmt(page.updated_at)}</time>
+        </p>
+        {hasAffiliateLinks(blocks) && <div className="mt-6"><Disclosure /></div>}
+        <div className="mt-8">
+          <BlockRenderer blocks={blocks} media={media} />
+        </div>
       </article>
-      <p className="mt-8 text-xs text-neutral-400">
-        Last updated {new Date(page.updated_at).toLocaleDateString("en-US", { dateStyle: "long" })}
-      </p>
-      {jsonLd.map((j, i) => (
-        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(j) }} />
-      ))}
-    </main>
+
+      {related.length > 0 && (
+        <aside className="mt-20 border-t border-line pt-10">
+          <h2 className="mb-6 font-serif text-3xl">More {category.name.toLowerCase()} guides</h2>
+          <PageGrid pages={related} />
+        </aside>
+      )}
+
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: page.title,
+          description: page.meta_description ?? undefined,
+          image: page.og_image ?? undefined,
+          datePublished: page.published_at ?? undefined,
+          dateModified: page.updated_at,
+          mainEntityOfPage: url,
+          inLanguage: "en-US",
+          author: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+          publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
+        }}
+      />
+      {page.schema_json && <JsonLd data={page.schema_json} />}
+    </div>
   );
 }
