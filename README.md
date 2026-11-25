@@ -26,10 +26,34 @@ Put these in `.env.local` locally and in Vercel project settings. Never commit t
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser and server |
 | `SUPABASE_SERVICE_ROLE_KEY` | server only |
 | `NEXT_PUBLIC_SITE_URL` | sitemap, canonical URLs |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | Contact and Privacy pages |
 | `HIGGSFIELD_API_KEY` | server only (phase 4) |
 
 ## Database
 Schema lives in `supabase/migrations/`. Apply with the Supabase CLI. Don't change tables only in the dashboard.
+
+```bash
+supabase link --project-ref <project-ref>
+supabase db push
+```
+
+Optional starter content (Watches category + one draft page skeleton): run `supabase/seed.sql` in the SQL editor.
+
+## Admin user
+Create the user in Supabase Auth, then give it the admin role (SQL editor):
+
+```sql
+update auth.users
+set raw_app_meta_data = raw_app_meta_data || '{"role":"admin"}'
+where email = 'you@example.com';
+```
+
+Sign out and back in at `/admin/login` so the new role is in the session.
+
+## Content editing
+- **Pages:** built from blocks (heading, text, image, deal card, link button, FAQ, CTA, comparison table). Text blocks support `**bold**`, `[links](/watches/page)` and `- ` lists.
+- **Links:** add affiliate links under Admin → Links, then pick them in deal cards, buttons and CTAs. They're served at `/go/<slug>` with `rel="sponsored nofollow"`, and the disclosure appears automatically.
+- **Media:** upload under Admin → Media. Alt text is required; images are converted to WebP.
 
 ## Deploy
 Push to `main` and Vercel deploys. Pull requests get preview URLs. Run `npm run build` first to catch errors.

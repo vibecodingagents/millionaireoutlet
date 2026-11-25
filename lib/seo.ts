@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://millionaireoutlet.com";
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://millionaireoutlet.com").replace(/\/$/, "");
 export const SITE_NAME = "millionaireoutlet";
 
 type SeoInput = {
@@ -12,11 +12,13 @@ type SeoInput = {
   noindex?: boolean;
 };
 
-export function buildMetadata(input: SeoInput, path: string): Metadata {
+// Pages without their own og_image fall back to app/opengraph-image.tsx.
+export function buildMetadata(input: SeoInput, path: string, type: "article" | "website" = "article"): Metadata {
   const title = input.meta_title || input.title;
   const url = input.canonical_url || `${SITE_URL}${path}`;
   return {
-    title,
+    // absolute: meta titles already follow "Keyword (Year) | millionaireoutlet" when set.
+    title: input.meta_title ? { absolute: input.meta_title } : title,
     description: input.meta_description ?? undefined,
     alternates: { canonical: url },
     robots: input.noindex ? { index: false, follow: false } : undefined,
@@ -26,8 +28,9 @@ export function buildMetadata(input: SeoInput, path: string): Metadata {
       url,
       siteName: SITE_NAME,
       locale: "en_US",
-      type: "article",
-      images: input.og_image ? [input.og_image] : undefined,
+      type,
+      ...(input.og_image ? { images: [{ url: input.og_image, width: 1200, height: 630 }] } : {}),
     },
+    twitter: { card: "summary_large_image" },
   };
 }
