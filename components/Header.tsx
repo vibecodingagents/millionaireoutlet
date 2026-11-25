@@ -2,12 +2,12 @@ import Link from "next/link";
 import { getCategories } from "@/lib/content";
 import { SITE_NAME } from "@/lib/seo";
 
-function SearchForm({ className = "" }: { className?: string }) {
+function SearchForm({ id, className = "" }: { id: string; className?: string }) {
   return (
     <form action="/search" role="search" className={className}>
-      <label htmlFor="site-search" className="sr-only">Search guides</label>
+      <label htmlFor={id} className="sr-only">Search guides</label>
       <input
-        id="site-search"
+        id={id}
         name="q"
         type="search"
         placeholder="Search guides"
@@ -35,14 +35,14 @@ export async function Header() {
             ))}
           </ul>
         </nav>
-        <SearchForm className="ml-auto hidden w-56 md:block" />
+        <SearchForm id="search-desktop" className="ml-auto hidden w-56 md:block" />
         {/* Mobile menu: <details> needs no client JavaScript. */}
         <details className="relative ml-auto md:hidden">
           <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-md border border-line" aria-label="Menu">
             <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.5" /></svg>
           </summary>
           <div className="absolute right-0 mt-2 w-72 rounded-lg border border-line bg-white p-4 shadow-lg">
-            <SearchForm />
+            <SearchForm id="search-mobile" />
             <ul className="mt-3 space-y-1">
               {categories.map((c) => (
                 <li key={c.slug}>
